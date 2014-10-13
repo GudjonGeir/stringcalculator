@@ -3,6 +3,7 @@ package is.ru.stringcalculator;
 public class Calculator {
 
 	public static int add(String text){
+		text = removeNewLines(text);
 		if(text.equals("")){
 			return 0;
 		}
@@ -29,6 +30,8 @@ public class Calculator {
 		return total;
     }
 
-
+    private static String removeNewLines(String text){
+    	return text.replace("\n", ",");
+    }
 
 }
