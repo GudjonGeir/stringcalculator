@@ -1,37 +1,33 @@
 package is.ru.stringcalculator;
 
+import java.util.*;
 import java.util.regex.*;
-
 
 
 public class Calculator {
 
 	public static int add(String text) throws NegativeNumberException
 	{
-		String delimiter = ",";
+		String delimiter =  "," ;
 		
 		
 
-		if (text.length() > 5 && text.substring(0, 2).equals("//")) 
+		if (text.startsWith("//")) 
 		{
 			int numberStartIndex = 0;
-			if (!text.substring(2,3).equals("[")) 
+			if(!(text.contains("[") && text.contains("]")))
 			{
 				delimiter = text.substring(2, 3);
 				numberStartIndex = 4;
+				text = text.substring(numberStartIndex, text.length());
 			}
 			else
 			{
-				Pattern p = Pattern.compile("\\[(.*?)\\]");
-				Matcher m = p.matcher(text);
-				if (m.find()) {
-					delimiter = m.group(1);
-					numberStartIndex = m.end() + 1;
-					
-				}
-				
+				String [] numbers = splitWithMultiDelims(text);
+				checkNeg(numbers);
+				return sum(numbers);	
 			}
-			text = text.substring(numberStartIndex, text.length());
+			
 		}
 		
 		
@@ -44,13 +40,48 @@ public class Calculator {
 		}
 		else if(text.contains(delimiter))
 		{
-			String[] numbers = splitNumbers(text, Pattern.quote(delimiter));
+			String[] numbers = splitNumbers(text, delimiter);
 			checkNeg(numbers);
 			
 			return sum(numbers);
 		}
 		else
 			return toInt(text);
+	}
+
+	private static String[] splitWithMultiDelims(String text)
+	{
+		List<String> delims = new ArrayList<String>();
+		
+		int numberStartIndex = 0;
+		Pattern p = Pattern.compile("\\[(.*?)\\]");
+		Matcher m = p.matcher(text);
+		while (m.find()) 
+		{
+			delims.add( m.group(1) );
+			numberStartIndex = m.end() + 1;
+		}
+
+		text = text.substring(numberStartIndex, text.length());
+		String[] numbers = {text};
+
+		for(String d : delims)
+		{
+			List<String> tmpNumbers = new ArrayList<String>();
+			for(String nums : numbers)
+			{
+
+				String[] tmp = nums.split(Pattern.quote(d));
+				for(String n : tmp)
+				{
+					tmpNumbers.add(n);
+				}
+			}
+			numbers = tmpNumbers.toArray(new String[tmpNumbers.size()]);
+		}
+			
+
+		return numbers;	
 	}
 
 
