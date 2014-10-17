@@ -1,25 +1,50 @@
 package is.ru.stringcalculator;
 
-import java.util.*;
+import java.util.regex.*;
+
+
 
 public class Calculator {
 
 	public static int add(String text) throws NegativeNumberException
 	{
 		String delimiter = ",";
+		
+		
 
-		if (text.length() > 5 && text.substring(0, 2).equals("//")) {
-			delimiter = text.substring(2, 3);
-			text = text.substring(4, text.length());
+		if (text.length() > 5 && text.substring(0, 2).equals("//")) 
+		{
+			int numberStartIndex = 0;
+			if (!text.substring(2,3).equals("[")) 
+			{
+				delimiter = text.substring(2, 3);
+				numberStartIndex = 4;
+			}
+			else
+			{
+				Pattern p = Pattern.compile("\\[(.*?)\\]");
+				Matcher m = p.matcher(text);
+				if (m.find()) {
+					delimiter = m.group(1);
+					numberStartIndex = m.end() + 1;
+					
+				}
+				
+			}
+			text = text.substring(numberStartIndex, text.length());
 		}
+		
+		
 
 		text = removeNewLines(text);
 
-		if(text.equals("")){
+		if(text.equals(""))
+		{
 			return 0;
 		}
-		else if(text.contains(delimiter)){
-			String[] numbers = splitNumbers(text, delimiter);
+		else if(text.contains(delimiter))
+		{
+			String[] numbers = splitNumbers(text, Pattern.quote(delimiter));
 			checkNeg(numbers);
 			
 			return sum(numbers);
@@ -28,7 +53,9 @@ public class Calculator {
 			return toInt(text);
 	}
 
-	private static int toInt(String number){
+
+	private static int toInt(String number)
+	{
 		return Integer.parseInt(number);
 	}
 
@@ -57,9 +84,9 @@ public class Calculator {
 		{
 			if(toInt(numbers[i]) < 0)
 			{
-			if (!negTrue) message += numbers[i];
-			else message += "," + numbers[i];
-			negTrue = true;
+				if (!negTrue) message += numbers[i];
+				else message += "," + numbers[i];
+				negTrue = true;
 			}
 		}
 		if (negTrue) throw new NegativeNumberException(message);
